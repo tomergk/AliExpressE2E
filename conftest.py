@@ -53,7 +53,7 @@ def browser_type_launch_args(browser_type_launch_args):
 def browser_context_args(browser_context_args):
     return {
         **browser_context_args,
-        "viewport": None,
+        "viewport": None,  # adapts to machine's actual screen; avoids off-screen element issues
         "user_agent": _config["user_agent"],
     }
 

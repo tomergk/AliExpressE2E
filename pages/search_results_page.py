@@ -10,7 +10,7 @@ class SearchResultsPage(BasePage):
     PRODUCT_LINK = "a.search-card-item"
     PRICE_ELEMENT = "div.lw_el"
     PRICE_SORT_BUTTON = "div[ae_object_value='price(lowest)']"
-    NEXT_PAGE_BUTTON = "button.comet-pagination-item-link:has(.comet-icon-arrowleft32)"
+    NEXT_PAGE_BUTTON = "button.comet-pagination-item-link:has(.comet-icon-arrowleft32)"  # RTL: left arrow = next page
 
     def search(self, query: str):
         url = self.SEARCH_URL.format(query=query.replace(" ", "+"))

@@ -40,7 +40,7 @@ class BasePage:
             end_x = track_box["x"] + track_box["width"] - handle_box["width"] / 2
             distance = end_x - start_x
 
-            # Run the drag in JS to bypass slow_mo (which adds 500ms per mouse.move call)
+            # JS evaluate bypasses Playwright's slow_mo, which would add 500ms per mouse.move call
             self.page.evaluate(f"""
                 (function() {{
                     function fire(type, x, y) {{
