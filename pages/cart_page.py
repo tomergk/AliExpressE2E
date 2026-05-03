@@ -10,7 +10,7 @@ class CartPage(BasePage):
     ITEM_CHECKBOX_CHECKED = "span.comet-v2-checkbox-checked"
     POPUP_CLOSE = "button.comet-v2-drawer-close"
     DELETE_SELECTED_BTN = "div.cart-header-delete-btn"
-    CONFIRM_DELETE_BTN = "button.comet-v2-btn-important span"
+    CONFIRM_DELETE_BTN = "button.comet-v2-btn-important"
 
     def open(self):
         self.navigate(self.CART_URL)
@@ -42,11 +42,11 @@ class CartPage(BasePage):
             delete_btn = self.page.locator(self.DELETE_SELECTED_BTN).first
             if delete_btn.is_visible():
                 delete_btn.click()
-                self.page.wait_for_timeout(1000)
+                self.page.wait_for_timeout(1500)
                 confirm = self.page.locator(self.CONFIRM_DELETE_BTN).first
                 if confirm.is_visible():
                     confirm.click()
-                    self.page.wait_for_timeout(1500)
+                    self.page.wait_for_timeout(2000)
         except Exception:
             pass
 
