@@ -1,4 +1,5 @@
 from pages.base_page import BasePage
+from playwright.sync_api import expect
 
 
 class LoginPage(BasePage):
@@ -18,19 +19,18 @@ class LoginPage(BasePage):
         self.close_popup()
         self.wait_for_element(self.ACCOUNT_TRIGGER)
         self.page.locator(self.ACCOUNT_TRIGGER).first.hover()
-        self.page.wait_for_timeout(500)
         self.wait_for_element(self.SIGNIN_BUTTON)
         self.page.locator(self.SIGNIN_BUTTON).first.click()
 
     def enter_email(self, email: str):
         self.wait_for_element(self.EMAIL_INPUT)
         self.page.fill(self.EMAIL_INPUT, email)
-        self.page.wait_for_timeout(500)
-        self.page.locator("h1[role='heading']").first.click()
+        expect(self.page.locator(self.EMAIL_INPUT)).to_have_value(email)
+        self.page.locator("h1[role='heading']").first.click() # clicking somewhere neutral on the page to dismiss the email autocomplete dropdown
 
+    # After entering the email, AliExpress shows a "Continue" button to proceed to the password step.
     def click_continue(self):
         self.page.locator(self.CONTINUE_BUTTON).first.click()
-        self.page.wait_for_timeout(1000)
 
     def enter_password(self, password: str):
         self.wait_for_element(self.PASSWORD_INPUT)
@@ -38,8 +38,7 @@ class LoginPage(BasePage):
 
     def click_login_button(self):
         self.page.locator(self.LOGIN_BUTTON).first.click()
-        self.page.wait_for_timeout(2000)
-        self.close_popup()
+        self.page.wait_for_load_state("load")
 
     def is_logged_in(self) -> bool:
         try:
@@ -54,4 +53,5 @@ class LoginPage(BasePage):
         self.click_continue()
         self.enter_password(password)
         self.click_login_button()
+        self.close_popup()
         assert self.is_logged_in(), "Login failed — check credentials or CAPTCHA"

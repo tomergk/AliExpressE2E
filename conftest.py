@@ -6,7 +6,7 @@ from utils.data_loader import load_json
 
 _config = load_json("data/config.json")
 
-
+# flexibility to run different versions of the test
 def pytest_addoption(parser):
     parser.addoption(
         "--profile",
@@ -15,7 +15,7 @@ def pytest_addoption(parser):
         help="Test profile: default, light, full"
     )
 
-
+# Hook for running when pytest parses CLI arguments
 def pytest_configure(config):
     os.makedirs("reports", exist_ok=True)
     with open(os.path.join("reports", "environment.properties"), "w") as f:
@@ -29,7 +29,7 @@ def pytest_configure(config):
 def credentials():
     return load_json("data/credentials.json")
 
-
+# Loading the profile we asked for in CLI
 @pytest.fixture(scope="session")
 def search_params(request):
     profile = request.config.getoption("--profile")
@@ -45,7 +45,9 @@ def browser_type_launch_args(browser_type_launch_args):
         "channel": "chrome",
         "headless": _config["headless"],
         "slow_mo": _config["slow_mo"],
-        "args": ["--disable-blink-features=AutomationControlled"],
+        # Passes a Chrome flag that hides the fact that the browser 
+        # is controlled by automation — helps avoid bot detection on sites like AliExpress.
+        "args": ["--disable-blink-features=AutomationControlled"], 
     }
 
 
@@ -63,6 +65,13 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, "rep_" + rep.when, rep)
+
+
+@pytest.fixture(autouse=True)
+def configure_timeouts(page):
+    page.set_default_timeout(_config["timeout"]) # max time Playwright will wait for any action
+    page.set_default_navigation_timeout(_config["timeout"]) # max time Playwright will wait specifically for page navigation — loading a new URL, waiting for the page to finish loading.
+    yield
 
 
 @pytest.fixture(autouse=True)

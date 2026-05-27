@@ -6,7 +6,10 @@ from playwright.sync_api import Page
 
 class BasePage:
 
-    _run_folders = {}
+    ITEMS_SCREENSHOTS = "screenshots/items-screenshots"
+    CART_SCREENSHOTS = "screenshots/cart-screenshots"
+
+    _run_folders = {} # to remember which screenshots folder was created for the current test run
 
     def __init__(self, page: Page):
         self.page = page
@@ -84,6 +87,7 @@ class BasePage:
             except Exception:
                 pass
 
+    # 3 attempts to connect Aliexpress
     def navigate(self, url: str, retries: int = 3):
         for attempt in range(retries):
             try:
@@ -99,13 +103,13 @@ class BasePage:
 
     def wait_for_element(self, selector: str):
         self.page.wait_for_selector(selector, timeout=15000)
-
-    def take_screenshot(self, name: str, root: str = "screenshots/items-screenshots"):
+        
+    def take_screenshot(self, name: str, root: str):
         if root not in BasePage._run_folders:
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             BasePage._run_folders[root] = os.path.join(root, timestamp)
         folder = BasePage._run_folders[root]
-        os.makedirs(folder, exist_ok=True)
+        os.makedirs(folder, exist_ok=True) # if the folder not exist then create it, if it already exists, don't crash.
         path = os.path.join(folder, f"{name}.png")
         self.page.screenshot(path=path)
         allure.attach.file(path, name=name, attachment_type=allure.attachment_type.PNG)
