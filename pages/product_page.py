@@ -29,12 +29,15 @@ class ProductPage(BasePage):
         self.page.wait_for_timeout(1500)
         self.close_popup()
 
-    def can_add_to_cart(self) -> bool:
+    # Because some products are unavailable
+    def can_add_to_cart(self) -> bool: 
         try:
+            # If the product is out of stock / unavailable then AliExpress doesn't render the add to cart button in the DOM.
             return self.page.locator(self.ADD_TO_CART_BUTTON).first.is_visible(timeout=5000)
         except Exception:
             return False
 
+    # Handle both new-tab and same-tab navigation back to search results
     def close_and_return_to_search(self):
         if len(self.page.context.pages) > 1:
             self.page.close()

@@ -1,6 +1,6 @@
 import allure
 from playwright.sync_api import Page
-
+from pages.base_page import BasePage
 from pages.login_page import LoginPage
 from pages.search_results_page import SearchResultsPage
 from pages.product_page import ProductPage
@@ -16,8 +16,8 @@ def search_items_by_name_under_price(
     page: Page, query: str, max_price_ils: float, max_price_usd: float, limit: int = 5
 ) -> tuple[list[str], float]:
     search_page = SearchResultsPage(page)
-    search_page.search(query)
-    search_page.apply_price_filter()
+    search_page.search_product(query)
+    search_page.sort_by_lowest_price()
     currency = search_page.detect_currency()
     max_price = max_price_ils if currency == "ILS" else max_price_usd
     print(f"\n[CURRENCY] Detected {currency} — using max_price={max_price}")
@@ -35,7 +35,7 @@ def add_items_to_cart(page: Page, urls: list[str]) -> int:
             continue
         product_page.add_to_cart()
         added += 1
-        product_page.take_screenshot(f"item_added_{added}")
+        product_page.take_screenshot(f"item_added_{added}", BasePage.ITEMS_SCREENSHOTS)
         product_page.close_and_return_to_search()
     return added
 
@@ -66,10 +66,11 @@ def test_e2e_shopping_scenario(page: Page, credentials: dict, search_params: lis
 
         try:
             with allure.step("Step 4: Assert cart total does not exceed budget"):
-                if added_count > 0:
-                    assert_cart_total_not_exceeds(page, max_price, added_count)
-                else:
-                    print("\n[SKIP] No items added to cart — skipping total verification")
+                assert added_count > 0, (
+                    f"No items were added to cart — found 0 products under {max_price} "
+                    f"for query '{query}'. Check price selector or budget."
+                )
+                assert_cart_total_not_exceeds(page, max_price, added_count)
         finally:
             with allure.step("Step 5: Clear cart for next run"):
                 CartPage(page).clear_cart()
